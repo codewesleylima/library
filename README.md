@@ -126,16 +126,24 @@ O servidor iniciará na porta 8080. Console H2 disponível em: http://localhost:
 O projeto utiliza GitHub Actions para automação completa:
 
 #### Jobs Executados:
-1. **Build & Test**: Compilação e execução de testes
-2. **Security Scan**: Análise de segurança com CodeQL
-3. **Dependency Check**: Verificação de vulnerabilidades em dependências
-4. **SonarCloud**: Análise de qualidade e cobertura
-5. **Docker Build**: Construção e teste da imagem Docker
+1. **CI - Build & Test**: Compilação, testes e relatórios JUnit
+2. **CodeQL**: Análise de segurança estática (SAST)
+3. **Dependency Check**: Detecção de vulnerabilidades OWASP
+4. **SonarCloud**: Qualidade de código e cobertura
+5. **Docker Build**: Construção e validação da imagem
 
 #### Gatilhos:
-- Push para branches `main` e `develop`
-- Pull Requests para branches `main` e `develop`
+- Push para branches `main`, `develop`, `update-readme`
+- Pull Requests para branches `main`, `develop`, `update-readme`
 - Execução manual via GitHub Actions
+- CodeQL: Executado também semanalmente (segunda-feira 2h)
+
+#### Workflows Separados:
+- **`.github/workflows/ci.yml`** - Build e testes
+- **`.github/workflows/codeql.yml`** - Análise de segurança
+- **`.github/workflows/dependency-check.yml`** - Verificação de dependências
+- **`.github/workflows/sonarcloud.yml`** - Qualidade de código
+- **`.github/workflows/docker.yml`** - Build Docker
 
 ### 📊 **Dependabot**
 Atualizações automáticas de dependências:
