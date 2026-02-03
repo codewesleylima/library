@@ -313,8 +313,3 @@ public class BookController {
 ## 📄 Licença
 
 Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
-
----
-
-*Desenvolvido com ❤️ utilizando Clean Architecture e CQRS*</content>
-<parameter name="filePath">/home/wesley/projetos/java-projetos/library/README.md
