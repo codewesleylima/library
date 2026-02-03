@@ -2,9 +2,9 @@ name: SonarCloud
 
 on:
   push:
-    branches: [ main, update-readme ]
+    branches: [ main, feature/library ]
   pull_request:
-    branches: [ main, update-readme ]
+    branches: [ main, feature/library ]
 
 jobs:
   sonarcloud:
