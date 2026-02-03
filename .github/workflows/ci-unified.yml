@@ -1,0 +1,282 @@
+name: Unified CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop, feature/library ]
+  pull_request:
+    branches: [ main, develop, feature/library ]
+  workflow_dispatch:
+  schedule:
+    - cron: '0 2 * * 1'  # CodeQL weekly scan
+
+env:
+  GRADLE_OPTS: -Dorg.gradle.daemon=false
+
+jobs:
+  # ==========================================
+  # JOB 1: FAST BUILD & TEST VALIDATION
+  # ==========================================
+  build-and-test:
+    name: "🚀 Build & Test"
+    runs-on: ubuntu-latest
+    outputs:
+      build-status: ${{ steps.build.outcome }}
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: ☕ Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: 🔧 Grant execute permission for Gradle
+        run: chmod +x gradlew
+
+      - name: 🏗️ Build & Test with JaCoCo
+        id: build
+        run: ./gradlew clean build jacocoTestReport
+
+      - name: 📊 Publish Test Report
+        if: always()
+        uses: dorny/test-reporter@v1
+        with:
+          name: JUnit Tests
+          path: build/test-results/test/*.xml
+          reporter: java-junit
+
+      - name: 📈 Upload JaCoCo Coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-coverage-report
+          path: build/reports/jacoco/
+          retention-days: 7
+
+      - name: 📦 Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: library-app-jar
+          path: build/libs/*.jar
+          retention-days: 7
+
+  # ==========================================
+  # JOB 2: SECURITY ANALYSIS (PARALLEL)
+  # ==========================================
+  security-analysis:
+    name: "🔒 Security Analysis"
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: needs.build-and-test.outputs.build-status == 'success'
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: ☕ Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: 🛡️ Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: java
+
+      - name: 🔧 Build for CodeQL Analysis
+        run: ./gradlew build -x test
+
+      - name: 🔍 Perform CodeQL Security Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:java"
+
+  # ==========================================
+  # JOB 3: DEPENDENCY VULNERABILITY SCAN
+  # ==========================================
+  dependency-check:
+    name: "📋 Dependency Security"
+    runs-on: ubuntu-latest
+    needs: build-and-test
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: ☕ Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: 🔎 Run OWASP Dependency Check
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: 'Library Management System'
+          path: '.'
+          format: 'ALL'
+          args: >
+            --enableRetired
+            --enableExperimental
+            --nvdValidForHours 24
+
+      - name: 📄 Upload Dependency Check Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: owasp-dependency-report
+          path: reports/
+          retention-days: 30
+
+  # ==========================================
+  # JOB 4: CODE QUALITY ANALYSIS
+  # ==========================================
+  code-quality:
+    name: "📊 Code Quality"
+    runs-on: ubuntu-latest
+    needs: build-and-test
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: ☕ Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: 📈 Cache SonarCloud packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      - name: 🧪 Build for SonarCloud Analysis
+        run: ./gradlew clean build jacocoTestReport
+
+      - name: 🎯 SonarCloud Quality Analysis
+        uses: SonarSource/sonarcloud-github-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.organization=codewesleylima
+            -Dsonar.projectKey=codewesleylima_library
+            -Dsonar.java.binaries=build/classes
+            -Dsonar.junit.reportPaths=build/test-results/test
+            -Dsonar.jacoco.reportPaths=build/jacoco/test.exec
+            -Dsonar.coverage.jacoco.xmlReportPaths=build/reports/jacoco/test/jacocoTestReport.xml
+
+  # ==========================================
+  # JOB 5: DOCKER BUILD & VALIDATION
+  # ==========================================
+  docker-validation:
+    name: "🐳 Docker Build"
+    runs-on: ubuntu-latest
+    needs: [build-and-test, security-analysis, dependency-check, code-quality]
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🐳 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 🏗️ Build Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: false
+          tags: library-management:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: ✅ Test Docker Container
+        run: |
+          echo "🚀 Starting Docker container..."
+          docker run --rm -d --name library-app -p 8080:8080 library-management:latest
+
+          echo "⏳ Waiting for application to start..."
+          sleep 30
+
+          echo "🏥 Checking health endpoint..."
+          if curl -f http://localhost:8080/actuator/health; then
+            echo "✅ Application is healthy!"
+          else
+            echo "❌ Application health check failed!"
+            docker logs library-app
+            exit 1
+          fi
+
+          echo "🛑 Stopping container..."
+          docker stop library-app
+
+      - name: 📸 Upload Docker Build Info
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-build-info
+          path: |
+            Dockerfile
+            .dockerignore
+          retention-days: 7
+
+  # ==========================================
+  # JOB 6: DEPLOYMENT READINESS (OPTIONAL)
+  # ==========================================
+  deployment-readiness:
+    name: "🚀 Deployment Ready"
+    runs-on: ubuntu-latest
+    needs: [docker-validation]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🎉 All Validations Passed
+        run: |
+          echo "🎊 Congratulations! All validations passed successfully!"
+          echo "✅ Build & Tests: PASSED"
+          echo "✅ Security Analysis: PASSED"
+          echo "✅ Dependency Check: PASSED"
+          echo "✅ Code Quality: PASSED"
+          echo "✅ Docker Build: PASSED"
+          echo ""
+          echo "🚀 Application is ready for deployment!"
+
+      - name: 📋 Generate Deployment Summary
+        run: |
+          echo "# 🚀 Deployment Readiness Report" > deployment-summary.md
+          echo "" >> deployment-summary.md
+          echo "## ✅ Validation Results" >> deployment-summary.md
+          echo "- Build & Tests: PASSED" >> deployment-summary.md
+          echo "- Security Analysis: PASSED" >> deployment-summary.md
+          echo "- Dependency Check: PASSED" >> deployment-summary.md
+          echo "- Code Quality: PASSED" >> deployment-summary.md
+          echo "- Docker Build: PASSED" >> deployment-summary.md
+          echo "" >> deployment-summary.md
+          echo "## 📊 Build Information" >> deployment-summary.md
+          echo "- Branch: ${{ github.ref_name }}" >> deployment-summary.md
+          echo "- Commit: ${{ github.sha }}" >> deployment-summary.md
+          echo "- Build Time: $(date)" >> deployment-summary.md
+          echo "" >> deployment-summary.md
+          echo "## 🏷️ Artifacts Ready" >> deployment-summary.md
+          echo "- JAR File: library-app.jar" >> deployment-summary.md
+          echo "- Docker Image: library-management:latest" >> deployment-summary.md
+          echo "- Test Reports: Available in Actions artifacts" >> deployment-summary.md
+
+      - name: 📤 Upload Deployment Summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-readiness-report
+          path: deployment-summary.md
+          retention-days: 30
