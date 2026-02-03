@@ -114,7 +114,7 @@ O servidor iniciará na porta 8080. Console H2 disponível em: http://localhost:
 
 ---
 
-## � Segurança e Qualidade
+## 🛡️ Segurança e Qualidade
 
 ### 🛡️ **Análise de Segurança**
 - **CodeQL**: Análise estática de código para vulnerabilidades
@@ -153,7 +153,7 @@ Atualizações automáticas de dependências:
 
 ---
 
-## �📌 Endpoints e exemplos de uso:
+## 📌 Endpoints e exemplos de uso:
 
 ### 📚 1 - Listar Todos os Livros:
 ```bash
@@ -391,5 +391,4 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](https://github.c
 
 ---
 
-*Desenvolvido com ❤️ utilizando Clean Architecture e CQRS*</content>
-<parameter name="filePath">/home/wesley/projetos/java-projetos/library/README.md
+*Desenvolvido com ❤️ utilizando Clean Architecture e CQRS*
