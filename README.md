@@ -301,7 +301,7 @@ public class BookController {
   <tr>
     <td align="center">
       <a href="https://github.com/codewesleylima" title="Wesley Lima">
-        <img src="https://avatars.githubusercontent.com/u/your-username" width="100px;" alt="Foto do Wesley Lima"/><br>
+        <img src="https://media.licdn.com/dms/image/v2/D4D03AQH8pgDMsT7zMw/profile-displayphoto-crop_800_800/B4DZs03OodH8AM-/0/1766118457145?e=1771459200&v=beta&t=D6FdPuUquCE43BWEXzglcI1zw_pMWO2PiYUJViZHQGQ" width="100px;" alt="Foto do Wesley Lima"/><br>
         <sub>
           <b>Wesley Lima</b>
         </sub>
