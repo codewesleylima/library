@@ -59,7 +59,9 @@ Este projeto demonstra boas práticas de desenvolvimento com:
 3. ✏️ **Atualização de Livros**: Modificar informações de livros existentes
 4. 🗑️ **Exclusão de Livros**: Remover livros do catálogo
 5. 🔍 **Busca Otimizada**: Consultas eficientes com CQRS
-6. ✅ **Testes Abrangentes**: Cobertura unitária e de integração
+6. 🌐 **Integração com Open Library**: Buscar livros em fontes externas
+7. 📥 **Importação de Livros**: Adicionar livros externos ao catálogo local
+8. ✅ **Testes Abrangentes**: Cobertura unitária e de integração
 
 #### Métodos de execução:
 
@@ -98,8 +100,11 @@ O servidor iniciará na porta 8080. Console H2 disponível em: http://localhost:
 #### 🛠️ Tecnologias utilizadas:
 - ☕ **Java 21**
 - 🍃 **Spring Boot 4.0.2**
+- ✨ **Spring WebFlux** (APIs reativas)
+- 🤖 **WebClient** (chamadas HTTP reativas)
 - 📂 **H2 Database** (em memória)
 - 🗄️ **Spring Data JPA**
+- 🔍 **Open Library API** (fonte externa de livros)
 - 🧪 **JUnit 5** (testes)
 - 📦 **Gradle** (build)
 - 🔧 **Lombok** (boilerplate reduction)
@@ -166,10 +171,36 @@ Content-Type: application/json
 }
 ```
 
-### 🗑️ 5 - Excluir Livro:
+#### 🔍 5 - Buscar Livros Externos (Open Library API):
 ```bash
-DELETE /api/books/{id}
+GET /api/books/search?query=clean+code
 ```
+
+**Exemplo de resposta:**
+```json
+[
+  {
+    "id": null,
+    "title": "Clean Code",
+    "author": "Robert C. Martin",
+    "isbn": "9780132350884"
+  }
+]
+```
+
+### ➕ 6 - Importar Livro da Busca Externa:
+```bash
+POST /api/books/import
+Content-Type: application/json
+
+{
+  "title": "Clean Code",
+  "author": "Robert C. Martin",
+  "isbn": "9780132350884"
+}
+```
+
+**Resposta:** Retorna o livro criado no banco local.
 
 ---
 
@@ -301,7 +332,7 @@ public class BookController {
   <tr>
     <td align="center">
       <a href="https://github.com/codewesleylima" title="Wesley Lima">
-        <img src="https://avatars.githubusercontent.com/u/your-username" width="100px;" alt="Foto do Wesley Lima"/><br>
+        <img src="https://media.licdn.com/dms/image/v2/D4D03AQH8pgDMsT7zMw/profile-displayphoto-crop_800_800/B4DZs03OodH8AM-/0/1766118457145?e=1771459200&v=beta&t=D6FdPuUquCE43BWEXzglcI1zw_pMWO2PiYUJViZHQGQ" width="100px;" alt="Foto do Wesley Lima"/><br>
         <sub>
           <b>Wesley Lima</b>
         </sub>
@@ -314,7 +345,7 @@ public class BookController {
 
 ## 📄 Licença
 
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](https://github.com/codewesleylima/library/blob/main/LICENSE) para mais detalhes.
 
 ---
 
