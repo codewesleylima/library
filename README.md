@@ -2,6 +2,9 @@
   <img src="https://img.shields.io/badge/Java-21-orange" alt="Java 21">
   <img src="https://img.shields.io/badge/Spring%20Boot-4.0.2-brightgreen" alt="Spring Boot">
   <img src="https://img.shields.io/badge/H2-Database-blue" alt="H2 Database">
+  <img src="https://img.shields.io/github/actions/workflow/status/codewesleylima/library/ci-cd.yml?branch=main&label=CI/CD" alt="CI/CD">
+  <img src="https://img.shields.io/github/actions/workflow/status/codewesleylima/library/security-scan.yml?branch=main&label=Security" alt="Security Scan">
+  <img src="https://img.shields.io/sonarcloud/api/project_badges/measure?project=codewesleylima_library&metric=alert_status&label=Quality" alt="Code Quality">
 </p>
 
 ## PROJETO PESSOAL - LIBRARY MANAGEMENT SYSTEM 📚
@@ -111,7 +114,38 @@ O servidor iniciará na porta 8080. Console H2 disponível em: http://localhost:
 
 ---
 
-## 📌 Endpoints e exemplos de uso:
+## � Segurança e Qualidade
+
+### 🛡️ **Análise de Segurança**
+- **CodeQL**: Análise estática de código para vulnerabilidades
+- **OWASP Dependency Check**: Verificação de vulnerabilidades em dependências
+- **SonarQube**: Análise de qualidade de código e cobertura de testes
+- **JaCoCo**: Relatórios de cobertura de código
+
+### 🚀 **CI/CD Pipeline**
+O projeto utiliza GitHub Actions para automação completa:
+
+#### Jobs Executados:
+1. **Build & Test**: Compilação e execução de testes
+2. **Security Scan**: Análise de segurança com CodeQL
+3. **Dependency Check**: Verificação de vulnerabilidades em dependências
+4. **SonarCloud**: Análise de qualidade e cobertura
+5. **Docker Build**: Construção e teste da imagem Docker
+
+#### Gatilhos:
+- Push para branches `main` e `develop`
+- Pull Requests para branches `main` e `develop`
+- Execução manual via GitHub Actions
+
+### 📊 **Dependabot**
+Atualizações automáticas de dependências:
+- **Gradle dependencies**: Semanalmente
+- **GitHub Actions**: Semanalmente
+- Pull Requests automáticos com revisores designados
+
+---
+
+## �📌 Endpoints e exemplos de uso:
 
 ### 📚 1 - Listar Todos os Livros:
 ```bash
