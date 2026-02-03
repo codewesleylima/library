@@ -1,7 +1,5 @@
 <p align="center">
-  <img src="https://img.shields.io/badge/Java-21-orange" alt="Java 21">
-  <img src="https://img.shields.io/badge/Spring%20Boot-4.0.2-brightgreen" alt="Spring Boot">
-  <img src="https://img.shields.io/badge/H2-Database-blue" alt="H2 Database">
+  <img src="https://iili.io/3FFO5cF.png" alt="Universidade Católica de Brasília">
 </p>
 
 ## PROJETO PESSOAL - LIBRARY MANAGEMENT SYSTEM 📚
