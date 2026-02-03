@@ -2,9 +2,9 @@ name: CodeQL
 
 on:
   push:
-    branches: [ main, feature/library ]
+    branches: [ main, update-readme ]
   pull_request:
-    branches: [ main, feature/library ]
+    branches: [ main, update-readme ]
   schedule:
     - cron: '0 2 * * 1'  # Every Monday at 2 AM
 

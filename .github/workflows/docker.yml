@@ -2,9 +2,9 @@ name: Docker Build
 
 on:
   push:
-    branches: [ main, feature/library ]
+    branches: [ main, update-readme ]
   pull_request:
-    branches: [ main, feature/library ]
+    branches: [ main, update-readme ]
 
 jobs:
   docker:
